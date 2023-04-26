@@ -42,7 +42,7 @@ public class SpellCheck {
             while ((line = reader.readLine()) != null) {
                 String[] lineWords = line.split("\\s+");
                 for (String w : lineWords) {
-                    words.add(w.trim().toLowerCase().replaceALL("[^a-z]", ""));
+                    words.add(w.trim().toLowerCase().replaceAll("[^a-z]", ""));
                 }
             }
         }
