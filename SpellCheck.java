@@ -108,6 +108,41 @@ public class SpellCheck {
 		return strings;
     }
 
+	/**takes a word and an integer n as input and returns a list of n-grams of length n
+	*/
+    public static List<String> generateNgrams(String word, int n) {
+   	 List<String> ngrams = new ArrayList<String>();
+   	 for(int i = 0; i < word.length()-n+1; i++) {
+      	 	 ngrams.add(word.substring(i, i + n));
+   			 }
+ 	   return ngrams;
+    }
+	
+	
+    public static void checkSpelling(String filename) throws IOException {
+    	List<String> dictionary = readDictionary();
+   	List<String> words = readFile(filename);
+
+   	for (String word : words) {
+       	 if (!dictionary.contains(word)) {
+            System.out.println("Misspelled word: " + word);
+            List<String> ngrams = generateNgrams(word, 2);
+            List<String> suggestions = new ArrayList<String>();
+
+         for (String dictWord : dictionary) {
+             List<String> dictNgrams = generateNgrams(dictWord, 2);
+              dictNgrams.retainAll(ngrams);
+                if (!dictNgrams.isEmpty()) {
+                    suggestions.add(dictWord);
+                }
+            }
+            if (!suggestions.isEmpty()) {
+                System.out.println("Suggestions: " + suggestions);
+                }
+             }
+           }
+       }
+ 
 
     /**
        Looks up all permutations of a string in the dictionary.
@@ -115,6 +150,12 @@ public class SpellCheck {
      */
     public static void main(String[] args)
 			throws FileNotFoundException, IOException {
+	    try {
+       		 String filename = "input.txt";
+     		   checkSpelling(filename);
+   		 } catch (IOException e) {
+    		   e.printStackTrace();
+    		  }
 		int minlen;
 		String dictionaryFile = args[0];
 		String letters = args[1];
