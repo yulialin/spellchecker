@@ -119,30 +119,72 @@ public class SpellCheck {
     }
 	
 	
-    public static void checkSpelling(String filename) throws IOException {
-    	List<String> dictionary = readDictionary();
-   	List<String> words = readFile(filename);
+   public static void checkSpelling(String filename) throws IOException {
+  	  List<String> dictionary = readDictionary();
+   	  List<String> words = readFile(filename);
 
-   	for (String word : words) {
-       	 if (!dictionary.contains(word)) {
-            System.out.println("Misspelled word: " + word);
-            List<String> ngrams = generateNgrams(word, 2);
-            List<String> suggestions = new ArrayList<String>();
-
-         for (String dictWord : dictionary) {
-             List<String> dictNgrams = generateNgrams(dictWord, 2);
-              dictNgrams.retainAll(ngrams);
-                if (!dictNgrams.isEmpty()) {
-                    suggestions.add(dictWord);
-                }
-            }
-            if (!suggestions.isEmpty()) {
-                System.out.println("Suggestions: " + suggestions);
-                }
-             }
+        for (String word : words) {
+           if (!dictionary.contains(word)) {
+             System.out.println("Misspelled word: " + word);
+             List<String> suggestions = suggestCorrectSpelling(word, dictionary);
+             System.out.println("Suggestions: " + suggestions);
            }
+         }
+        }
+
+   public static List<String> suggestCorrectSpelling(String word, List<String> dictionary) {
+   	 int n = 3; // use trigrams
+   	 int threshold = 2; // maximum edit distance
+    	Map<String, Integer> ngramCounts = new HashMap<>();
+   	 List<String> suggestions = new ArrayList<>();
+
+   	 // Compute n-gram counts for the dictionary
+       for (String dictWord : dictionary) {
+         for (int i = 0; i <= dictWord.length() - n; i++) {
+            String ngram = dictWord.substring(i, i + n);
+            int count = ngramCounts.getOrDefault(ngram, 0);
+            ngramCounts.put(ngram, count + 1);
+        }
+    }
+
+    // Generate n-grams for the misspelled word and compute edit distance to dictionary words
+      Map<String, Integer> misspelledNgrams = new HashMap<>();
+      for (int i = 0; i <= word.length() - n; i++) {
+         String ngram = word.substring(i, i + n);
+         int count = misspelledNgrams.getOrDefault(ngram, 0);
+           misspelledNgrams.put(ngram, count + 1);
+          }
+      for (String dictWord : dictionary) {
+        if (Math.abs(dictWord.length() - word.length()) <= n) {
+            Map<String, Integer> dictNgrams = new HashMap<>();
+            for (int i = 0; i <= dictWord.length() - n; i++) {
+                String ngram = dictWord.substring(i, i + n);
+                int count = dictNgrams.getOrDefault(ngram, 0);
+                dictNgrams.put(ngram, count + 1);
+            }
+            int editDistance = computeEditDistance(misspelledNgrams, dictNgrams);
+            	if (editDistance <= threshold) {
+                suggestions.add(dictWord);
+              }
+           }
+         }
+
+        return suggestions;
        }
- 
+
+     public static int computeEditDistance(Map<String, Integer> s1, Map<String, Integer> s2) {
+  	  Set<String> allKeys = new HashSet<>();
+  	  allKeys.addAll(s1.keySet());
+   	  allKeys.addAll(s2.keySet());
+   	  int editDistance = 0;
+    	for (String key : allKeys) {
+       	   int count1 = s1.getOrDefault(key, 0);
+           int count2 = s2.getOrDefault(key, 0);
+         editDistance += Math.abs(count1 - count2);
+            }
+        return editDistance;
+     }
+
 
     /**
        Looks up all permutations of a string in the dictionary.
