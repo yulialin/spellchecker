@@ -69,8 +69,8 @@ public class SpellCheck {
 		int mid = lo + (hi - lo) / 2;
 		if (lo > hi) return NOT_FOUND;
 
-		if (key.compareTo(arr[mid]) < 0) return indexOf(arr,key,lo,mid-1);
-		if (key.compareTo(arr[mid]) > 0) return indexOf(arr, key, mid+1, hi);
+		else if (key.compareTo(arr[mid]) < 0) return indexOf(arr,key,lo,mid-1);
+		else if (key.compareTo(arr[mid]) > 0) return indexOf(arr, key, mid+1, hi);
 		else return mid;
 
     }
